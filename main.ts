@@ -176,81 +176,83 @@ namespace Shaders {
         return L;
     };
 
-    interface Ripple {
-        origin: Shaders.Vec2;
-        startTime: number;
+    // interface Ripple {
+    //     origin: Shaders.Vec2;
+    //     startTime: number;
 
-        // precomputed each frame
-        age?: number;
-        waveDist?: number;
-    }
+    //     // precomputed each frame
+    //     age?: number;
+    //     waveDist?: number;
+    // }
 
-    let ripples: Ripple[] = [];
+    // let ripples: Ripple[] = [];
 
-    browserEvents.MouseLeft.onEvent(browserEvents.MouseButtonEvent.Pressed, function(x: number, y: number) {
-        ripples.push({
-            origin: new Shaders.Vec2(x, y),
-            startTime: game.runtime() / 1000
-        });
-    })
+    // browserEvents.MouseLeft.onEvent(browserEvents.MouseButtonEvent.Pressed, function(x: number, y: number) {
+    //     ripples.push({
+    //         origin: new Shaders.Vec2(x, y),
+    //         startTime: game.runtime() / 1000
+    //     });
+    // })
 
-    game.onUpdate(() => {
-        const now = game.runtime() / 1000;
-        ripples = ripples.filter(r => now - r.startTime < 5); // keep last 5s
+    // game.onUpdate(() => {
+    //     const now = game.runtime() / 1000;
+    //     ripples = ripples.filter((r) => {
+    //         return now - r.startTime < 5
+    //     }); // keep last 5s
 
-        // precompute per-ripple values once per frame
-        for (const r of ripples) {
-            r.age = now - r.startTime;
-            r.waveDist = r.age * 40; // speed in px/sec
-        }
-    });
+    //     // precompute per-ripple values once per frame
+    //     for (const r of ripples) {
+    //         r.age = now - r.startTime;
+    //         r.waveDist = r.age * 40; // speed in px/sec
+    //     }
+    // });
 
-    function rippleContribution(frag: Shaders.Vec2, r: Ripple): number {
-        const dx3 = frag.x - r.origin.x;
-        const dy3 = frag.y - r.origin.y;
-        const dist22 = dx3 * dx3 + dy3 * dy3;
+    // function rippleContribution(frag: Shaders.Vec2, r: Ripple): number {
+    //     const dx3 = frag.x - r.origin.x;
+    //     const dy3 = frag.y - r.origin.y;
+    //     const dist22 = dx3 * dx3 + dy3 * dy3;
 
-        const dist6 = Math.sqrt(dist22); // one sqrt only if near the ripple
-        const diff = dist6 - (r.waveDist || 0);
+    //     const dist6 = Math.sqrt(dist22); // one sqrt only if near the ripple
+    //     const diff = dist6 - (r.waveDist || 0);
 
-        // cull if pixel is far from wavefront
-        if (Math.abs(diff) > 40) return 0;
+    //     // cull if pixel is far from wavefront
+    //     if (Math.abs(diff) > 40) return 0;
 
-        // simple triangular falloff instead of exp()
-        const ring = Math.max(0, 1 - Math.abs(diff) * 0.05);
+    //     // simple triangular falloff instead of exp()
+    //     const ring = Math.max(0, 1 - Math.abs(diff) * 0.05);
 
-        // cheap oscillation (precompute freq/speed if needed)
-        return Math.sin(dist6 * 0.25 - (r.age || 0) * 4) * ring * 0.5;
-    }
+    //     // cheap oscillation (precompute freq/speed if needed)
+    //     return Math.sin(dist6 * 0.25 - (r.age || 0) * 4) * ring * 0.5;
+    // }
 
-    const checkerWithRippleClick: Shaders.Shader = (frag, u) => {
-        // --- Checkerboard base ---
-        const uvx4 = frag.x / u.resolution.x;
-        const uvy4 = frag.y / u.resolution.y;
-        const scale2 = 10;
-        const tx2 = Math.floor(uvx4 * scale2);
-        const ty2 = Math.floor(uvy4 * scale2);
-        const isWhite2 = ((tx2 + ty2) & 1) ? 1 : 0;
-        const base2 = isWhite2 ? 0.9 : 0.1;
+    // const checkerWithRippleClick: Shaders.Shader = (frag, u) => {
+    //     // --- Checkerboard base ---
+    //     const uvx4 = frag.x / u.resolution.x;
+    //     const uvy4 = frag.y / u.resolution.y;
+    //     const scale2 = 10;
+    //     const tx2 = Math.floor(uvx4 * scale2);
+    //     const ty2 = Math.floor(uvy4 * scale2);
+    //     const isWhite2 = ((tx2 + ty2) & 1) ? 1 : 0;
+    //     const base2 = isWhite2 ? 0.9 : 0.1;
 
-        // --- Accumulate ripple contributions ---
-        let rippleSum = 0;
-        for (let i = 0; i < ripples.length; i++) {
-            rippleSum += rippleContribution(frag, ripples[i]);
-        }
+    //     // --- Accumulate ripple contributions ---
+    //     let rippleSum = 0;
+    //     for (let i = 0; i < ripples.length; i++) {
+    //         rippleSum += rippleContribution(frag, ripples[i]);
+    //     }
 
-        // combine (tune ripple strength)
-        let L2 = base2 + rippleSum;
+    //     // combine (tune ripple strength)
+    //     let L2 = base2 + rippleSum;
 
-        // clamp
-        if (L2 < 0) L2 = 0;
-        if (L2 > 1) L2 = 1;
+    //     // clamp
+    //     if (L2 < 0) L2 = 0;
+    //     if (L2 > 1) L2 = 1;
 
-        return L2;
-    };
+    //     return L2;
+    // };
 
     // initDefaults()
     // setActiveProgram((uniforms, screen) => {
-    //     runShader(checkerWithRippleClick, screen, uniforms);
+    //     runShader(checkerWithRipple, screen, uniforms);
     // })
 }
